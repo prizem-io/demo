@@ -1,0 +1,6 @@
+database:
+  host: postgres1
+  port: 5432
+  name: discovery
+  user: discovery
+  password: discovery
