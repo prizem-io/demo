@@ -1,0 +1,19 @@
+# STEP 1 build executable binary
+
+FROM golang:1.11.1-alpine as builder
+
+COPY . $GOPATH/src/github.com/prizem-io/demo
+WORKDIR $GOPATH/src/github.com/prizem-io/demo
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-w -s" -o /build/proxy-inject cmd/inject/main.go
+
+
+# STEP 2 build image
+
+FROM ubuntu:xenial
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+    iproute2 \
+    iptables \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /build/proxy-inject /usr/local/bin
+ENTRYPOINT ["/usr/local/bin/proxy-inject"]

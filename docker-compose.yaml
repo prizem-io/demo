@@ -1,0 +1,87 @@
+version: '3'
+services:
+
+  postgres1:
+    image: postgres:latest
+    volumes:
+      - "./pgdata:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+    environment:
+      - "POSTGRES_PASSWORD=mysecretpassword"
+
+  control-plane:
+    image: prizem-io/control-plane:latest
+    depends_on:
+      - postgres1
+    ports:
+      - "9000:8000"
+    volumes:
+      - "./etc/control-plane:/app/etc"
+
+  proxy:
+    image: prizem-io/proxy:latest
+    depends_on:
+      - control-plane
+    ports:
+      - "8000:50052"
+      - "6060:6060"
+    volumes:
+      - "./etc/proxy:/app/etc"
+    environment:
+      - "REST_API_URI=http://control-plane:8000"
+      - "GRPC_API_TARGET=control-plane:9000"
+      - "MIXER_TARGET=mixer:9091"
+
+  proxy-init:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.proxy-init
+    image: prizem-io/demo-proxy-init
+    network_mode: host
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      - proxy
+    environment:
+      - "PROXY_HOST=proxy"
+      - "PROXY_PORT=50062"
+      - "PROXY_IP=172.28.0.7"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    image: prizem-io/demo-frontend
+    environment:
+      - "BACKEND_URI=http://api.prizem.com/message"
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    image: prizem-io/demo-backend
+    environment:
+      - "MESSAGE_URI=http://api.prizem.com/sayHello"
+
+  message:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.message
+    image: prizem-io/demo-message
+
+  announce:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.announce
+    image: prizem-io/demo-announce
+    depends_on:
+      - proxy
+      - frontend
+      - backend
+      - message
+    environment:
+      - "REGISTER_URI=http://proxy:6060/register"
+      - "SERVICES=frontend,backend,message"

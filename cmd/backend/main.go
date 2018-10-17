@@ -35,13 +35,11 @@ func main() {
 			}
 			propagate.Outgoing(ctx, req.Header)
 
-			log.Printf("making call")
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
 				log.Printf("[ERROR] Failed to do request: %s", err)
 				return
 			}
-			log.Printf("finished call")
 
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(resp.StatusCode)

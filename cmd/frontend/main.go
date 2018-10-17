@@ -48,6 +48,10 @@ func main() {
 			return
 		}
 
+		contentType := resp.Header.Get("Content-Type")
+		if contentType != "" {
+			w.Header().Add("Content-Type", contentType)
+		}
 		w.WriteHeader(resp.StatusCode)
 		io.Copy(w, resp.Body)
 	})
