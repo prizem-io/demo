@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -79,7 +80,9 @@ func main() {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	<-c
 
-	req, err := http.NewRequest("DELETE", registerURI, nil)
+	// Deregister the services
+	commaDelimited := strings.Join(services, ",")
+	req, err := http.NewRequest("DELETE", registerURI+"/"+url.PathEscape(commaDelimited), nil)
 	if err != nil {
 		panic(err)
 	}
