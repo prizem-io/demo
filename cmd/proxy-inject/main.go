@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"unicode"
 
 	"github.com/cenkalti/backoff"
 )
@@ -26,6 +28,7 @@ func main() {
 		proxyPort = "50062"
 	}
 
+	proxyFile := os.Getenv("PROXY_FILE")
 	proxyIP := os.Getenv("PROXY_IP")
 
 	notify := func(err error, d time.Duration) {
@@ -33,13 +36,27 @@ func main() {
 	}
 
 	var addrs []string
-	if proxyIP != "" {
+	if proxyFile != "" {
+		err := backoff.RetryNotify(func() (err error) {
+			data, err := ioutil.ReadFile(proxyFile)
+			if err != nil {
+				return err
+			}
+			addrs = strings.FieldsFunc(string(data), func(r rune) bool {
+				return r == ',' || unicode.IsSpace(r)
+			})
+			return nil
+		}, backoff.NewExponentialBackOff(), notify)
+		if err != nil {
+			panic(err)
+		}
+	} else if proxyIP != "" {
 		addrs = []string{proxyIP}
 	} else {
 		err := backoff.RetryNotify(func() (err error) {
 			// TODO: Figure out how to inject the IP of the proxy with `network_mode: host`
 			addrs, err = net.LookupHost(proxyHost)
-			return
+			return nil
 		}, backoff.NewExponentialBackOff(), notify)
 		if err != nil {
 			panic(err)
@@ -73,6 +90,10 @@ func main() {
 	err := cmd.Run()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if proxyFile != "" {
+		os.Remove(proxyFile)
 	}
 
 	c := make(chan os.Signal, 1)

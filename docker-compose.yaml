@@ -1,6 +1,8 @@
 version: '3'
 services:
 
+  # Control Plane
+
   jaeger:
     image: jaegertracing/all-in-one:1.6
     ports:
@@ -49,11 +51,24 @@ services:
       - "JAEGER_AGENT_PORT=6831"
       - "MIXER_TARGET=mixer:9091"
 
-  proxy-init:
+  proxy-resolve:
     build:
       context: .
-      dockerfile: docker/Dockerfile.proxy-init
-    image: prizem-io/demo-proxy-init
+      dockerfile: docker/Dockerfile.proxy-resolve
+    image: prizem-io/demo-proxy-resolve
+    depends_on:
+      - proxy
+    volumes:
+      - "./etc/proxy:/app/etc"
+    environment:
+      - "PROXY_HOST=proxy"
+      - "PROXY_FILE=etc/proxy-ip.txt"
+
+  proxy-inject:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.proxy-inject
+    image: prizem-io/demo-proxy-inject
     network_mode: host
     privileged: true
     cap_add:
@@ -61,10 +76,15 @@ services:
       - NET_RAW
     depends_on:
       - proxy
+      - proxy-resolve
+    volumes:
+      - "./etc/proxy:/usr/local/bin/etc"
     environment:
       - "PROXY_HOST=proxy"
       - "PROXY_PORT=50062"
-      - "PROXY_IP=172.19.0.8"
+      - "PROXY_FILE=etc/proxy-ip.txt"
+
+  # Services
 
   frontend:
     build:
