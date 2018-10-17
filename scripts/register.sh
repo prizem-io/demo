@@ -1,6 +1,6 @@
 #!/bin/bash
 curl -X PUT \
-  http://control-plane:8000/v1/routes \
+  http://localhost:9000/v1/routes \
   -H 'Content-Type: application/json' \
   -d '{
   "name": "frontend",
@@ -29,7 +29,7 @@ curl -X PUT \
 }'
 
 curl -X PUT \
-  http://control-plane:8000/v1/routes \
+  http://localhost:9000/v1/routes \
   -H 'Content-Type: application/json' \
   -d '{
   "name": "backend",
@@ -58,7 +58,7 @@ curl -X PUT \
 }'
 
 curl -X PUT \
-  http://control-plane:8000/v1/routes \
+  http://localhost:9000/v1/routes \
   -H 'Content-Type: application/json' \
   -d '{
   "name": "message",
