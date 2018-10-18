@@ -11,7 +11,7 @@ This repo demostrates running Prizem [proxy](https://github.com/prizem-io/proxy)
 ### Running the demo
 
 ```bash
-docker-compose up
+docker-compose up --build
 ```
 
 ### Test it!
