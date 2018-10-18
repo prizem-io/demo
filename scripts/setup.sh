@@ -2,14 +2,14 @@
 
 # Build control plane
 echo "Building the control plane..."
-go get -u github.com/prizem-io/control-plane
+go get -u github.com/prizem-io/control-plane/...
 cd $GOPATH/src/github.com/prizem-io/control-plane
 ./build.sh
 cd -
 
 # Build proxy
 echo "Building the proxy..."
-go get -u github.com/prizem-io/proxy
+go get -u github.com/prizem-io/proxy/...
 cd $GOPATH/src/github.com/prizem-io/proxy
 ./build.sh
 cd -
