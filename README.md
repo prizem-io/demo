@@ -22,3 +22,5 @@ curl -s -k -u demo:demo -X GET \
   -H 'Accept: application/json; v=1' \
   -H 'Content-Type: application/json; v=1' | jq
 ```
+
+You can then navigate to [http://localhost:16686](http://localhost:16686 "Jaeger UI") to access the Jaeger UI.
