@@ -13,3 +13,12 @@ This repo demostrates running Prizem [proxy](https://github.com/prizem-io/proxy)
 ```bash
 docker-compose up
 ```
+
+### Test it!
+
+```bash
+curl -s -k -u demo:demo -X GET \
+  https://localhost:8000/hello \
+  -H 'Accept: application/json; v=1' \
+  -H 'Content-Type: application/json; v=1' | jq
+```
