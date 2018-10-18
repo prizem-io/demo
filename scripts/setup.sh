@@ -17,6 +17,7 @@ cd -
 
 # Run Postgres
 echo "Running Postgres..."
+mkdir -p pgdata
 docker run --rm --name postgres \
     -v $(pwd)/pgdata:/var/lib/postgresql/data \
     -p 5432:5432 \
