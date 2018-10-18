@@ -11,6 +11,7 @@ cd -
 echo "Building the proxy..."
 go get -u github.com/prizem-io/proxy/...
 cd $GOPATH/src/github.com/prizem-io/proxy
+dep ensure
 ./build.sh
 cd -
 
