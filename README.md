@@ -2,10 +2,16 @@
 
 This repo demostrates running Prizem [proxy](https://github.com/prizem-io/proxy)/[control plane](https://github.com/prizem-io/control-plane), [Jaeger](https://www.jaegertracing.io), and [Istio Mixer](https://istio.io) to connect 3 different services together.
 
-### Initialization
+### Setup / Initialization
 
 ```bash
 ./scripts/setup.sh
+```
+
+Then add this entry to your `/etc/hosts`.  Really the IP can be anything because it is ignored when transparent proxying is initialized.  You can also use whatever hostname you'd - just search and replace `api.prizem.io` in `docker-compose.yaml`.
+
+```
+172.99.0.2      api.prizem.io
 ```
 
 ### Running the demo
