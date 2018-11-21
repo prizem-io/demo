@@ -2,12 +2,14 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -17,7 +19,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-const registerTemplate = `{"id": "%s", "service": "%s", "name": "%s", "ports": [{"port": %d, "protocol": "HTTP/1"}]}'`
+const registerTemplate = `{"id": %s, "service": %s, "name": %s, "ports": [{"port": %d, "protocol": "HTTP/1"}]}'`
 
 func main() {
 	registerURI := os.Getenv("REGISTER_URI")
@@ -37,6 +39,17 @@ func main() {
 	client := &http.Client{}
 
 	for _, service := range services {
+		port := 8000 // default port
+		if i := strings.IndexRune(service, ':'); i != -1 {
+			var err error
+			portString := service[i+1:]
+			port, err = strconv.Atoi(portString)
+			if err != nil {
+				panic(fmt.Errorf("invalid port %s", portString))
+			}
+			service = service[0:i]
+		}
+
 		ebo.Reset()
 		var ips []net.IP
 		err := backoff.RetryNotify(func() (err error) {
@@ -47,7 +60,7 @@ func main() {
 			panic(err)
 		}
 
-		payload := fmt.Sprintf(registerTemplate, uuid.NewV4(), service, service, 8000)
+		payload := fmt.Sprintf(registerTemplate, jsonEncode(uuid.NewV4().String()), jsonEncode(service), jsonEncode(service), port)
 		req, err := http.NewRequest("POST", registerURI, bytes.NewReader([]byte(payload)))
 		if err != nil {
 			panic(err)
@@ -110,4 +123,12 @@ func getHostIPv4s(host string) ([]net.IP, error) {
 	}
 
 	return results, nil
+}
+
+func jsonEncode(value interface{}) string {
+	data, err := json.Marshal(value)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
 }
