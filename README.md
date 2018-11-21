@@ -4,11 +4,13 @@ This repo demostrates running Prizem [proxy](https://github.com/prizem-io/proxy)
 
 ### Setup / Initialization
 
+First, verify that you are not running Postgres or any other service on port `5432` or `9000`.  This can be checked using `lsof -i tcp:5432` and `lsof -i tcp:9000`.  Then run the command below.
+
 ```bash
 ./scripts/setup.sh
 ```
 
-Then add this entry to your `/etc/hosts`.  Really the IP can be anything because it is ignored when transparent proxying is initialized.  You can also use whatever hostname you'd - just search and replace `api.prizem.io` in `docker-compose.yaml`.
+Next, add this entry to your `/etc/hosts`.  The IP can be anything because it is ignored when transparent proxying is initialized.  You can also use any hostname you'd like - just search and replace `api.prizem.io` in `docker-compose.yaml`.
 
 ```
 172.99.0.2      api.prizem.io
@@ -19,6 +21,8 @@ Then add this entry to your `/etc/hosts`.  Really the IP can be anything because
 ```bash
 docker-compose up --build
 ```
+
+After the first run, the `--build` flag is not necessary.
 
 ### Test it!
 

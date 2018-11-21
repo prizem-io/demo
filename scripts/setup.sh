@@ -1,5 +1,7 @@
 #!/bin/bash
 
+docker network create --driver bridge mesh-network
+
 # Build control plane
 echo "Building the control plane..."
 go get -u github.com/prizem-io/control-plane/...
@@ -19,13 +21,14 @@ cd -
 echo "Running Postgres..."
 mkdir -p pgdata
 docker run --rm --name postgres \
+    --network mesh-network \
     -v $(pwd)/pgdata:/var/lib/postgresql/data \
     -p 5432:5432 \
     -e POSTGRES_PASSWORD=mysecretpassword \
     -d postgres
 
 echo "Waiting for Postgres to start..."
-sleep 10
+sleep 15
 
 # Initialize database schema
 echo "Initializing database schema..."
@@ -34,6 +37,7 @@ echo "Initializing database schema..."
 # Run Control Plane
 echo "Running control plane..."
 docker run --rm -d --name control-plane \
+    --network mesh-network \
     -p 9000:8000 \
     -v $(pwd)/etc/control-plane:/app/etc \
     -t prizem-io/control-plane:latest
@@ -48,3 +52,5 @@ echo "Registering services..."
 # Cleanup
 echo "Shutting down..."
 docker stop control-plane postgres
+
+docker network rm mesh-network
