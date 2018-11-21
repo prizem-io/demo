@@ -120,4 +120,4 @@ services:
       - message
     environment:
       - "REGISTER_URI=http://proxy:6060/register"
-      - "SERVICES=frontend,backend,message"
+      - "SERVICES=frontend:8000,backend:8000,message:8000"
